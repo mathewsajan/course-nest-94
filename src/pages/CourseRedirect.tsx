@@ -1,9 +1,18 @@
 import { Navigate, useParams } from "react-router-dom";
-import { getCourse, getFirstIncompleteLesson } from "@/data/mockData";
+import { useCourse, getFirstIncompleteLesson } from "@/hooks/useCourses";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CourseRedirect() {
   const { courseId } = useParams<{ courseId: string }>();
-  const course = getCourse(courseId || "");
+  const { data: course, isLoading } = useCourse(courseId);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Skeleton className="h-8 w-48" />
+      </div>
+    );
+  }
 
   if (!course) return <Navigate to="/" replace />;
 

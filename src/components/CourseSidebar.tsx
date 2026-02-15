@@ -8,8 +8,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import type { Course, LessonType } from "@/data/mockData";
-import { getCompletedCount, getTotalCount } from "@/data/mockData";
+import type { CourseWithSections, LessonType } from "@/types/course";
+import { getCompletedCount, getTotalCount } from "@/hooks/useCourses";
 
 const typeIcons: Record<LessonType, React.ElementType> = {
   text: FileText,
@@ -19,23 +19,21 @@ const typeIcons: Record<LessonType, React.ElementType> = {
 };
 
 interface CourseSidebarProps {
-  course: Course;
+  course: CourseWithSections;
 }
 
 export function CourseSidebar({ course }: CourseSidebarProps) {
   const { lessonId } = useParams();
   const completed = getCompletedCount(course);
   const total = getTotalCount(course);
-  const progress = Math.round((completed / total) * 100);
+  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  // Find which section contains the active lesson to default-open it
   const activeSection = course.sections.find((s) =>
     s.lessons.some((l) => l.id === lessonId)
   );
 
   return (
     <div className="flex h-full flex-col">
-      {/* Progress header */}
       <div className="border-b p-4">
         <p className="mb-2 text-sm font-medium text-foreground">
           {completed}/{total} completed
@@ -43,7 +41,6 @@ export function CourseSidebar({ course }: CourseSidebarProps) {
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Course outline */}
       <div className="flex-1 overflow-y-auto p-2">
         <Accordion
           type="multiple"
