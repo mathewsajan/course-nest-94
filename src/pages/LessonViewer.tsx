@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Menu, CheckCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { CourseSidebar } from "@/components/CourseSidebar";
 import { LessonContent } from "@/components/LessonContent";
-import { CommentsSection } from "@/components/CommentsSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,20 +16,45 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { getLesson, getAdjacentLessons, getCourse } from "@/data/mockData";
+import { useCourse, useCompleteLesson, getAdjacentLessons, getLessonWithSection } from "@/hooks/useCourses";
 
 export default function LessonViewer() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const result = getLesson(courseId || "", lessonId || "");
-  const course = getCourse(courseId || "");
+  const { data: course, isLoading } = useCourse(courseId);
+  const completeLesson = useCompleteLesson();
 
-  if (!result || !course) return <Navigate to="/" replace />;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container py-8 space-y-4">
+          <Skeleton className="h-6 w-64" />
+          <Skeleton className="h-8 w-96" />
+          <Skeleton className="aspect-video w-full max-w-3xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) return <Navigate to="/" replace />;
+
+  const result = getLessonWithSection(course, lessonId || "");
+  if (!result) return <Navigate to={`/course/${courseId}`} replace />;
 
   const { section, lesson } = result;
   const { prev, next } = getAdjacentLessons(course, lesson.id);
+
+  const handleComplete = () => {
+    completeLesson.mutate(lesson.id, {
+      onSuccess: () => {
+        if (next) navigate(`/course/${course.id}/lesson/${next.id}`);
+      },
+    });
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -94,17 +119,28 @@ export default function LessonViewer() {
 
             {/* Complete & Continue */}
             <div className="mt-8">
-              {next ? (
-                <Button asChild className="gap-2">
-                  <Link to={`/course/${course.id}/lesson/${next.id}`}>
+              {lesson.completed ? (
+                next ? (
+                  <Button asChild className="gap-2" variant="outline">
+                    <Link to={`/course/${course.id}/lesson/${next.id}`}>
+                      Continue
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button disabled className="gap-2">
                     <CheckCircle className="h-4 w-4" />
-                    Complete & Continue
-                  </Link>
-                </Button>
+                    Course Complete!
+                  </Button>
+                )
               ) : (
-                <Button disabled className="gap-2">
+                <Button
+                  onClick={handleComplete}
+                  disabled={completeLesson.isPending}
+                  className="gap-2"
+                >
                   <CheckCircle className="h-4 w-4" />
-                  Course Complete!
+                  {completeLesson.isPending ? "Saving..." : "Complete & Continue"}
                 </Button>
               )}
             </div>
@@ -132,9 +168,6 @@ export default function LessonViewer() {
                 <div />
               )}
             </div>
-
-            {/* Comments */}
-            <CommentsSection comments={lesson.comments} />
           </div>
         </main>
       </div>
