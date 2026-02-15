@@ -1,11 +1,18 @@
-import { BookOpen } from "lucide-react";
+import { BookOpen, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navbar() {
   const location = useLocation();
   const isCreator = location.pathname.startsWith("/creator");
+  const { user, signOut } = useAuth();
+
+  const initials = user?.user_metadata?.display_name
+    ? user.user_metadata.display_name.slice(0, 2).toUpperCase()
+    : user?.email?.slice(0, 2).toUpperCase() ?? "??";
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -34,8 +41,11 @@ export function Navbar() {
             Creator
           </Link>
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="text-xs bg-primary text-primary-foreground">JD</AvatarFallback>
+            <AvatarFallback className="text-xs bg-primary text-primary-foreground">{initials}</AvatarFallback>
           </Avatar>
+          <Button variant="ghost" size="icon" onClick={signOut} title="Sign out">
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </header>
