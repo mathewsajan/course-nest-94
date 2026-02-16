@@ -8,7 +8,6 @@ import {
   FileText,
   Video,
   Link2,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
   Save,
@@ -21,39 +20,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useCourse, useSaveCourse } from "@/hooks/useCourses";
-import type { LessonType } from "@/types/course";
 import { toast } from "@/hooks/use-toast";
 
-const typeIcons: Record<LessonType, React.ElementType> = {
-  text: FileText,
-  video: Video,
-  link: Link2,
-  quiz: HelpCircle,
-};
-
-const typeLabels: Record<LessonType, string> = {
-  text: "Text",
-  video: "Video",
-  link: "Link",
-  quiz: "Quiz",
-};
 
 interface EditableLesson {
   tempId: string;
   title: string;
-  type: LessonType;
   content: string;
   video_url: string;
   link_url: string;
@@ -67,36 +44,31 @@ interface EditableSection {
 }
 
 function LessonEditor({ lesson, onUpdate, onDelete }: { lesson: EditableLesson; onUpdate: (l: EditableLesson) => void; onDelete: () => void }) {
-  const Icon = typeIcons[lesson.type];
   return (
     <div className="flex items-start gap-2 rounded-md border bg-background p-3">
       <GripVertical className="mt-2.5 h-4 w-4 shrink-0 cursor-grab text-muted-foreground" />
       <div className="flex-1 space-y-3">
         <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <Input value={lesson.title} onChange={(e) => onUpdate({ ...lesson, title: e.target.value })} className="h-8 text-sm" placeholder="Lesson title" />
-          <Select value={lesson.type} onValueChange={(v) => onUpdate({ ...lesson, type: v as LessonType })}>
-            <SelectTrigger className="h-8 w-24 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {Object.entries(typeLabels).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <Input value={lesson.title} onChange={(e) => onUpdate({ ...lesson, title: e.target.value })} className="h-8 text-sm flex-1" placeholder="Lesson title" />
           <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={onDelete}>
             <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
         </div>
-        {lesson.type === "video" && (
-          <Input value={lesson.video_url} onChange={(e) => onUpdate({ ...lesson, video_url: e.target.value })} placeholder="Video embed URL" className="h-8 text-sm" />
-        )}
-        {lesson.type === "link" && (
-          <Input value={lesson.link_url} onChange={(e) => onUpdate({ ...lesson, link_url: e.target.value })} placeholder="External link URL" className="h-8 text-sm" />
-        )}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Video className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <Input value={lesson.video_url} onChange={(e) => onUpdate({ ...lesson, video_url: e.target.value })} placeholder="Video embed URL (optional)" className="h-8 text-sm" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Link2 className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <Input value={lesson.link_url} onChange={(e) => onUpdate({ ...lesson, link_url: e.target.value })} placeholder="External link URL (optional)" className="h-8 text-sm" />
+          </div>
+        </div>
         <Textarea
           value={lesson.content.replace(/<[^>]*>/g, "")}
           onChange={(e) => onUpdate({ ...lesson, content: `<p>${e.target.value}</p>` })}
-          placeholder="Lesson content..."
+          placeholder="Lesson text content (optional)..."
           className="min-h-[60px] text-sm"
           rows={2}
         />
@@ -119,7 +91,7 @@ function SectionEditor({
   const addLesson = () => {
     onUpdate({
       ...section,
-      lessons: [...section.lessons, { tempId: `tmp-${Date.now()}`, title: "New Lesson", type: "text", content: "", video_url: "", link_url: "", duration: "" }],
+      lessons: [...section.lessons, { tempId: `tmp-${Date.now()}`, title: "New Lesson", content: "", video_url: "", link_url: "", duration: "" }],
     });
   };
 
@@ -187,7 +159,6 @@ export default function CourseEditor() {
           lessons: s.lessons.map((l) => ({
             tempId: l.id,
             title: l.title,
-            type: l.type,
             content: l.content || "",
             video_url: l.video_url || "",
             link_url: l.link_url || "",
@@ -210,7 +181,7 @@ export default function CourseEditor() {
           title: s.title,
           lessons: s.lessons.map((l) => ({
             title: l.title,
-            type: l.type,
+            type: "text",
             content: l.content,
             video_url: l.video_url,
             link_url: l.link_url,
