@@ -4,11 +4,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export function Navbar() {
   const location = useLocation();
   const isCreator = location.pathname.startsWith("/creator");
   const { user, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
 
   const initials = user?.user_metadata?.display_name
     ? user.user_metadata.display_name.slice(0, 2).toUpperCase()
@@ -31,15 +33,17 @@ export function Navbar() {
           >
             My Courses
           </Link>
-          <Link
-            to="/creator"
-            className={cn(
-              "text-sm font-medium transition-colors hover:text-foreground",
-              isCreator ? "text-foreground" : "text-muted-foreground"
-            )}
-          >
-            Creator
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/creator"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isCreator ? "text-foreground" : "text-muted-foreground"
+              )}
+            >
+              Creator
+            </Link>
+          )}
           <Avatar className="h-8 w-8">
             <AvatarFallback className="text-xs bg-primary text-primary-foreground">{initials}</AvatarFallback>
           </Avatar>
