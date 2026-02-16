@@ -1,4 +1,4 @@
-export type LessonType = "text" | "video" | "link" | "quiz";
+export type LessonType = "text" | "video" | "link";
 
 export interface DbCourse {
   id: string;

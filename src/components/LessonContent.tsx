@@ -9,7 +9,7 @@ interface LessonContentProps {
 export function LessonContent({ lesson }: LessonContentProps) {
   return (
     <div className="space-y-6">
-      {lesson.type === "video" && lesson.video_url && (
+      {lesson.video_url && (
         <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted">
           <iframe
             src={lesson.video_url}
@@ -21,7 +21,7 @@ export function LessonContent({ lesson }: LessonContentProps) {
         </div>
       )}
 
-      {lesson.type === "link" && lesson.link_url && (
+      {lesson.link_url && (
         <a href={lesson.link_url} target="_blank" rel="noopener noreferrer" className="inline-block">
           <Button variant="outline" className="gap-2">
             <ExternalLink className="h-4 w-4" />

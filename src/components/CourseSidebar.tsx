@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { CheckCircle2, FileText, Video, Link2, HelpCircle } from "lucide-react";
+import { CheckCircle2, FileText, Video, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -15,7 +15,6 @@ const typeIcons: Record<LessonType, React.ElementType> = {
   text: FileText,
   video: Video,
   link: Link2,
-  quiz: HelpCircle,
 };
 
 interface CourseSidebarProps {
