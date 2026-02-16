@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { CreatorRoute } from "@/components/CreatorRoute";
 import Index from "./pages/Index";
 import CourseRedirect from "./pages/CourseRedirect";
 import LessonViewer from "./pages/LessonViewer";
@@ -27,8 +28,8 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/course/:courseId" element={<ProtectedRoute><CourseRedirect /></ProtectedRoute>} />
             <Route path="/course/:courseId/lesson/:lessonId" element={<ProtectedRoute><LessonViewer /></ProtectedRoute>} />
-            <Route path="/creator" element={<ProtectedRoute><CreatorDashboard /></ProtectedRoute>} />
-            <Route path="/creator/course/:courseId" element={<ProtectedRoute><CourseEditor /></ProtectedRoute>} />
+            <Route path="/creator" element={<ProtectedRoute><CreatorRoute><CreatorDashboard /></CreatorRoute></ProtectedRoute>} />
+            <Route path="/creator/course/:courseId" element={<ProtectedRoute><CreatorRoute><CourseEditor /></CreatorRoute></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
