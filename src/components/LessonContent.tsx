@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { LessonWithProgress } from "@/types/course";
@@ -33,7 +34,7 @@ export function LessonContent({ lesson }: LessonContentProps) {
       {lesson.content && (
         <div
           className="prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground"
-          dangerouslySetInnerHTML={{ __html: lesson.content }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(lesson.content) }}
         />
       )}
     </div>
