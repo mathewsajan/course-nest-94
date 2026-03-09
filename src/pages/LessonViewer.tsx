@@ -169,6 +169,9 @@ export default function LessonViewer() {
                 <div />
               )}
             </div>
+
+            {/* Comments */}
+            <CommentsSection lessonId={lesson.id} />
           </div>
         </main>
       </div>
