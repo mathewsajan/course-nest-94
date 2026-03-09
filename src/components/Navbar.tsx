@@ -29,10 +29,19 @@ export function Navbar() {
             to="/"
             className={cn(
               "text-sm font-medium transition-colors hover:text-foreground",
-              !isCreator ? "text-foreground" : "text-muted-foreground"
+              !isCreator && !isCatalog ? "text-foreground" : "text-muted-foreground"
             )}
           >
             My Courses
+          </Link>
+          <Link
+            to="/catalog"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-foreground",
+              isCatalog ? "text-foreground" : "text-muted-foreground"
+            )}
+          >
+            Catalog
           </Link>
           {isAdmin && (
             <Link
