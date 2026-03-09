@@ -8,6 +8,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export function Navbar() {
   const location = useLocation();
+  const isCatalog = location.pathname === "/catalog";
   const isCreator = location.pathname.startsWith("/creator");
   const { user, signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
