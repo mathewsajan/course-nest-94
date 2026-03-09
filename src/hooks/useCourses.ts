@@ -184,6 +184,56 @@ export function useEnroll() {
   });
 }
 
+// ─── Catalog: all courses with enrollment status ───
+
+export function useCatalogCourses() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["catalog-courses", user?.id],
+    queryFn: async () => {
+      const [{ data: rawCourses, error: cErr }, { data: enrollments }] = await Promise.all([
+        db("courses").select("*").order("created_at", { ascending: false }),
+        db("enrollments").select("course_id").eq("user_id", user!.id),
+      ]);
+      if (cErr) throw cErr;
+      const courses = (rawCourses as unknown as DbCourse[]) || [];
+      const enrolledIds = new Set(((enrollments as unknown as DbEnrollment[]) || []).map((e) => e.course_id));
+
+      // Instructor profiles
+      const instructorIds = courses.map((c) => c.instructor_id).filter(Boolean) as string[];
+      let profilesMap: Record<string, string> = {};
+      if (instructorIds.length > 0) {
+        const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", instructorIds);
+        if (profiles) for (const p of profiles) profilesMap[p.id] = p.display_name || "Instructor";
+      }
+
+      // Lesson counts per course
+      const courseIds = courses.map((c) => c.id);
+      let lessonCounts: Record<string, number> = {};
+      if (courseIds.length > 0) {
+        const { data: sections } = await db("sections").select("id, course_id").in("course_id", courseIds);
+        const secs = (sections as unknown as DbSection[]) || [];
+        const sectionIds = secs.map((s) => s.id);
+        if (sectionIds.length > 0) {
+          const { data: lessons } = await db("lessons").select("id, section_id").in("section_id", sectionIds);
+          const lessonRows = (lessons as unknown as DbLesson[]) || [];
+          for (const sec of secs) {
+            lessonCounts[sec.course_id] = (lessonCounts[sec.course_id] || 0) + lessonRows.filter((l) => l.section_id === sec.id).length;
+          }
+        }
+      }
+
+      return courses.map((c) => ({
+        ...c,
+        instructor_name: c.instructor_id ? profilesMap[c.instructor_id] || "Instructor" : null,
+        enrolled: enrolledIds.has(c.id),
+        lessonCount: lessonCounts[c.id] || 0,
+      }));
+    },
+    enabled: !!user,
+  });
+}
+
 // ─── Creator: fetch courses by instructor ───
 
 export function useCreatorCourses() {
