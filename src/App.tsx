@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CreatorRoute } from "@/components/CreatorRoute";
 import Index from "./pages/Index";
+import Catalog from "./pages/Catalog";
 import CourseRedirect from "./pages/CourseRedirect";
 import LessonViewer from "./pages/LessonViewer";
 import CreatorDashboard from "./pages/CreatorDashboard";

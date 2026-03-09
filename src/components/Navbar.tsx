@@ -1,4 +1,4 @@
-import { BookOpen, LogOut } from "lucide-react";
+import { BookOpen, Library, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
