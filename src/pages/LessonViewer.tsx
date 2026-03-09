@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Menu, CheckCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { CourseSidebar } from "@/components/CourseSidebar";
 import { LessonContent } from "@/components/LessonContent";
+import { CommentsSection } from "@/components/CommentsSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
