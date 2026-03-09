@@ -1,47 +1,43 @@
 
-## Wiring Up CommentsSection
 
-### What's happening now
+## Hide Creator Access from Students
 
-`CommentsSection.tsx` exists but:
-- It still reads from the `mockData` `Comment` type (static, fake data)
-- It is never imported or rendered anywhere
-- There is no `lesson_comments` table in the database
+**Problem:** Every logged-in user sees the "Creator" link in the navbar and can access `/creator` routes. Since you're the only creator, students shouldn't see or access those pages.
 
-The component needs to be fully rebuilt to work with real data: students post comments on a lesson, instructors can reply, all stored in Supabase.
+**Solution:** Use the existing `user_roles` table and `has_role` database function to gate creator access. You already have the `admin` role in the `app_role` enum -- we'll assign you the `admin` role and use it to control visibility.
 
-### Plan
+---
 
-**1. Database migration** — new `lesson_comments` table:
-```text
-lesson_comments
-  id           uuid  PK
-  lesson_id    uuid  FK → lessons.id (cascade delete)
-  user_id      uuid  FK → auth.users (cascade delete)
-  parent_id    uuid  FK → lesson_comments.id  (null = top-level, non-null = reply)
-  content      text  NOT NULL
-  created_at   timestamptz
-```
-RLS policies:
-- SELECT: authenticated users can read all comments
-- INSERT: authenticated users, `user_id = auth.uid()`
-- DELETE: own comments only (`user_id = auth.uid()`)
-- No UPDATE (keep it simple)
+### Steps
 
-**2. Update Supabase types** — add `lesson_comments` to `src/integrations/supabase/types.ts`
+1. **Assign your account the `admin` role** -- Insert a row into `user_roles` for your user ID with role `admin` (done via the Supabase SQL editor or insert tool, since RLS blocks client-side inserts).
 
-**3. Rewrite `CommentsSection.tsx`** — replace mock `Comment` import with:
-- `useComments(lessonId)` hook → fetches comments + replies + author display names from `profiles`
-- `usePostComment()` mutation → inserts a new top-level comment
-- `usePostReply()` mutation → inserts a reply (with `parent_id`)
-- UI: list of comments, each with a "Reply" toggle that reveals an inline reply input
-- Post box at the top for new top-level comments (textarea + Submit button)
-- Shows author display name + relative date
+2. **Create a `useIsAdmin` hook** -- A small hook that queries `user_roles` to check if the current user has the `admin` role. Caches the result with React Query.
 
-**4. Wire into `LessonViewer.tsx`** — import and render `<CommentsSection lessonId={lesson.id} />` below the prev/next navigation bar
+3. **Update the Navbar** -- Only show the "Creator" link when `useIsAdmin()` returns `true`.
 
-### Files touched
-- `supabase/migrations/[new].sql` — create `lesson_comments` table + RLS
-- `src/integrations/supabase/types.ts` — add `lesson_comments` table types
-- `src/components/CommentsSection.tsx` — full rewrite with real data + post form
-- `src/pages/LessonViewer.tsx` — add `<CommentsSection lessonId={lesson.id} />`
+4. **Update the ProtectedRoute / Add a CreatorRoute wrapper** -- Create a `CreatorRoute` component that checks `useIsAdmin()` and redirects non-admin users to `/` (or shows a 404). Wrap all `/creator` routes with it.
+
+---
+
+### Technical Details
+
+**New file: `src/hooks/useIsAdmin.ts`**
+- Queries `user_roles` table filtering by `auth.uid()` and role `admin`
+- Returns `{ isAdmin: boolean, isLoading: boolean }`
+- Uses React Query with a long stale time since roles rarely change
+
+**Modified: `src/components/Navbar.tsx`**
+- Import `useIsAdmin`
+- Conditionally render the "Creator" link only when `isAdmin` is true
+
+**New file: `src/components/CreatorRoute.tsx`**
+- Wraps children with an admin check
+- Shows loading spinner while checking, redirects to `/` if not admin
+
+**Modified: `src/App.tsx`**
+- Wrap `/creator` and `/creator/course/:courseId` routes with `CreatorRoute` instead of just `ProtectedRoute`
+
+**Data insert (via SQL/insert tool):**
+- Insert your user ID into `user_roles` with role `admin` (we'll look up your user ID first)
+
