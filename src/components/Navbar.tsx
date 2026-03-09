@@ -1,4 +1,4 @@
-import { BookOpen, LogOut } from "lucide-react";
+import { BookOpen, Library, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export function Navbar() {
   const location = useLocation();
+  const isCatalog = location.pathname === "/catalog";
   const isCreator = location.pathname.startsWith("/creator");
   const { user, signOut } = useAuth();
   const { isAdmin } = useIsAdmin();
@@ -28,10 +29,19 @@ export function Navbar() {
             to="/"
             className={cn(
               "text-sm font-medium transition-colors hover:text-foreground",
-              !isCreator ? "text-foreground" : "text-muted-foreground"
+              !isCreator && !isCatalog ? "text-foreground" : "text-muted-foreground"
             )}
           >
             My Courses
+          </Link>
+          <Link
+            to="/catalog"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-foreground",
+              isCatalog ? "text-foreground" : "text-muted-foreground"
+            )}
+          >
+            Catalog
           </Link>
           {isAdmin && (
             <Link

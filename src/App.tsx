@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CreatorRoute } from "@/components/CreatorRoute";
 import Index from "./pages/Index";
+import Catalog from "./pages/Catalog";
 import CourseRedirect from "./pages/CourseRedirect";
 import LessonViewer from "./pages/LessonViewer";
 import CreatorDashboard from "./pages/CreatorDashboard";
@@ -26,6 +27,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/catalog" element={<ProtectedRoute><Catalog /></ProtectedRoute>} />
             <Route path="/course/:courseId" element={<ProtectedRoute><CourseRedirect /></ProtectedRoute>} />
             <Route path="/course/:courseId/lesson/:lessonId" element={<ProtectedRoute><LessonViewer /></ProtectedRoute>} />
             <Route path="/creator" element={<ProtectedRoute><CreatorRoute><CreatorDashboard /></CreatorRoute></ProtectedRoute>} />
